@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saki Mind Agent</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <link href="https://cdn.jsdelivr.net/npm/prismjs/themes/prism-tomorrow.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/prism.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-markup.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-css.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-javascript.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-sql.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-python.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-c.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/prismjs/components/prism-cpp.min.js"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+</head>
+<body>
+
+    <div id="key-gate" style="position:fixed; top:0; left:0; width:100%; height:100%; background:#f4f7f6; z-index:10000; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:sans-serif;">
+        <h2 style="color:#333;">Welcome, Sir.</h2>
+        <p style="color:#666;">Please enter your API Key to wake Saki.</p>
+        <input type="password" id="key-input" placeholder="gsk_..." style="padding:12px; width:300px; border-radius:8px; border:1px solid #ccc; margin-bottom:15px; outline:none;">
+        <button onclick="enterSaki()" style="padding:12px 24px; background:#222; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">Initialize Saki</button>
+        <p style="font-size:11px; color:#aaa; margin-top:15px; text-transform:uppercase; letter-spacing:1px;">Session-only authentication</p>
+    </div>  
+
+    <nav class="top-nav hidden" id="top-nav">
+        <button id="menu-btn"><i class="fas fa-bars"></i></button>
+        <div class="nav-title">Saki <small id="status">(Offline)</small></div>
+        <div style="width: 30px;"></div> 
+    </nav>
+
+    <div id="sidebar" class="sidebar-hidden">
+        <div class="sidebar-header">
+            <h2>Menu</h2>
+            <button id="close-sidebar">&times;</button>
+        </div>
+        <div class="sidebar-tabs">
+            <div class="sidebar-tab active" onclick="switchTab('chat-tab', this)"><i class="fas fa-comments"></i> Chat</div>
+            <div class="sidebar-tab" onclick="switchTab('talk-tab', this)"><i class="fas fa-microphone"></i> Talk</div>
+            <div class="sidebar-tab" onclick="switchTab('tasks-tab', this)"><i class="fas fa-list-check"></i> Tasks</div>
+            <div class="sidebar-tab" onclick="switchTab('tools-tab', this)"><i class="fas fa-magic"></i> Tools</div>
+            <div class="sidebar-tab" onclick="switchTab('devices-tab', this)"><i class="fas fa-mobile-alt"></i> Devices</div>
+        </div>
+        <div class="sidebar-bottom">
+            <div class="sidebar-tab" onclick="openModal('settings-modal')"><i class="fas fa-cog"></i> Settings</div>
+            <div class="sidebar-tab" onclick="openModal('appearance-modal')"><i class="fas fa-palette"></i> Appearance</div>
+        </div>
+    </div>
+
+    <main id="main-content" class="hidden">
+        
+        <div id="chat-tab" class="screen active-screen">
+            <div id="chat-messages">
+                <div class="msg bot">Hi, how can I help you, Muhammad?</div>
+            </div>
+            <div class="chat-input-area">
+                <div class="background">
+                    <i class="fas fa-plus"></i>
+                </div>
+                <div class="input-wrapper">
+                    <textarea id="user-input" placeholder="Message Saki..." rows="1"></textarea>
+                </div>
+                <i class="fas fa-microphone record-btn" id="record-btn"></i>
+                <button id="send-btn" class="send-button hidden">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+
+        <div id="talk-tab" class="screen hidden-screen">
+            <div class="voice-body">
+                <h2>Live Comm Link</h2>
+                <button id="mic-btn"><i class="fas fa-microphone"></i></button>
+                <p id="voice-status">Tap the mic to start speaking.</p>
+            </div>
+        </div>
+
+        <div id="tasks-tab" class="screen hidden-screen">
+            <div class="placeholder-content">
+                <i class="fas fa-list-check"></i>
+                <h2>Tasks</h2>
+                <p>AI Schedule and Task Management initializing...</p>
+            </div>
+        </div>
+
+        <div id="sidebar-overlay" class="hidden"></div>
+
+        <div id="devices-tab" class="screen hidden-screen">
+            <div class="placeholder-content">
+                <i class="fas fa-mobile-alt"></i>
+                <h2>Devices</h2>
+                <p>Connected hardware and IoT links initializing...</p>
+            </div>
+        </div>
+    </main>
+
+    <div id="appearance-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span><i class="fas fa-palette"></i> Themes</span>
+                <button class="close-modal" data-target="appearance-modal">&times;</button>
+            </div>
+            <div class="theme-grid">
+                <div class="theme-btn dark" onclick="setTheme('dark-1')">Dark 1 (Green)</div>
+                <div class="theme-btn dark" onclick="setTheme('dark-2')">Dark 2 (Blue)</div>
+                <div class="theme-btn dark" onclick="setTheme('dark-3')">Dark 3 (Purple)</div>
+                <div class="theme-btn dark" onclick="setTheme('dark-4')">Dark 4 (Red)</div>
+                <div class="theme-btn light" onclick="setTheme('light-1')">Light 1 (Green)</div>
+                <div class="theme-btn light" onclick="setTheme('light-2')">Light 2 (Blue)</div>
+                <div class="theme-btn light" onclick="setTheme('light-3')">Light 3 (Purple)</div>
+                <div class="theme-btn light" onclick="setTheme('light-4')">Light 4 (Orange)</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="settings-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span><i class="fas fa-cog"></i> Settings</span>
+                <button class="close-modal" data-target="settings-modal">&times;</button>
+            </div>
+            <div style="padding: 20px;">
+                <p>System settings and API key configurations will go here.</p>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
